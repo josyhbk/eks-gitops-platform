@@ -1,0 +1,8 @@
+# Envoy Gateway: the Gateway API controller. It installs the Gateway API CRDs
+# too. The GatewayClass and the Gateway itself are in platform/gateway.
+deployment:
+  envoyGateway:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi

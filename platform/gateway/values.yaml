@@ -1,0 +1,6 @@
+# How the Envoy proxies behind the Gateway are exposed.
+service:
+  type: LoadBalancer
+  annotations: {}
+  # Fixed NodePort for the HTTP listener, for clusters with no load balancer
+  nodePort: null

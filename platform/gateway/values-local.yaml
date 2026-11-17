@@ -1,0 +1,4 @@
+# kind has no load balancer: bootstrap/kind.yaml publishes this NodePort on 127.0.0.1:8880
+service:
+  type: NodePort
+  nodePort: 30080

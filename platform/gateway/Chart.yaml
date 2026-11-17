@@ -1,0 +1,5 @@
+apiVersion: v2
+name: gateway
+description: The shared Gateway every app attaches its HTTPRoute to, and how Envoy is exposed.
+type: application
+version: 1.0.0

@@ -1,0 +1,32 @@
+# Grafana's admin login, generated once in the cluster and never stored in git.
+# Without it the chart makes up a new random password on every render, and
+# under Argo CD that means a new password and a Grafana restart on every commit.
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: Password
+metadata:
+  name: grafana-admin
+spec:
+  length: 24
+  digits: 4
+  symbols: 0
+  noUpper: false
+  allowRepeat: true
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: grafana-admin
+spec:
+  refreshPolicy: CreatedOnce
+  target:
+    name: grafana-admin
+    template:
+      data:
+        admin-user: admin
+        admin-password: "{{ .password }}"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: Password
+          name: grafana-admin

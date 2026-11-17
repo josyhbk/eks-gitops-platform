@@ -1,0 +1,23 @@
+# podinfo: a small Go web app with /metrics, health probes and a UI.
+replicaCount: 2
+
+ui:
+  message: Deployed by Argo CD
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 64Mi
+
+# Scraped by the Prometheus in platform/monitoring
+serviceMonitor:
+  enabled: true
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: web
+      namespace: gateway
+      sectionName: http

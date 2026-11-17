@@ -1,0 +1,10 @@
+# Single-node lab cluster. The gateway's NodePort 30080 is published on
+# 127.0.0.1:8880, so http://<name>.localhost:8880 reaches it from the host.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8880
+        listenAddress: 127.0.0.1

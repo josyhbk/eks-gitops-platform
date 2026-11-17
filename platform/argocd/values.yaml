@@ -1,0 +1,31 @@
+# Argo CD manages its own install with these values after the first `helm install`.
+dex:
+  enabled: false
+
+configs:
+  params:
+    server.insecure: true  # TLS ends at the gateway
+
+  cm:
+    # Report a child Application's health to its parent, so sync waves in the
+    # app of apps wait for the previous wave to be healthy and not just applied.
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {status = "Progressing", message = ""}
+      if obj.status ~= nil and obj.status.health ~= nil then
+        hs.status = obj.status.health.status
+        hs.message = obj.status.health.message or ""
+      end
+      return hs
+
+  # OCI chart registries need declaring; classic Helm repositories do not.
+  repositories:
+    podinfo:
+      type: helm
+      name: podinfo
+      url: ghcr.io/stefanprodan/charts
+      enableOCI: "true"
+    envoyproxy:
+      type: helm
+      name: envoyproxy
+      url: docker.io/envoyproxy
+      enableOCI: "true"
