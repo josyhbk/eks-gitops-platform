@@ -1,0 +1,43 @@
+# kube-prometheus-stack: Prometheus, Alertmanager, Grafana and the operator.
+
+# Control plane components are managed on EKS and bound to localhost on kind,
+# so they cannot be scraped. Scraping them only produces TargetDown alerts.
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 2d
+    # Pick up ServiceMonitors, PodMonitors and rules from every namespace,
+    # not only the ones labelled for this release
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 400Mi
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+
+grafana:
+  # Created by External Secrets, see manifests/grafana-admin.yaml
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  sidecar:
+    dashboards:
+      # Dashboards ship as ConfigMaps next to the app they describe
+      searchNamespace: ALL

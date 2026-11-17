@@ -1,0 +1,59 @@
+# Set by the root Application (bootstrap/root.yaml).
+repoURL: https://github.com/josyhbk/eks-gitops-platform.git
+revision: main
+cluster: local
+
+# One entry per component. Each one reads <dir>/values.yaml, then
+# <dir>/values-<cluster>.yaml when it exists. Without `chart`, <dir> is a
+# chart in this repo. Lower waves sync first, and the next wave waits until
+# they are healthy (see the Application health check in
+# platform/argocd/values.yaml). A cluster file sets `enabled: false` to drop one.
+components:
+  envoy-gateway:
+    dir: platform/envoy-gateway
+    namespace: envoy-gateway-system
+    repo: docker.io/envoyproxy
+    chart: gateway-helm
+    version: v1.10.0
+    wave: 0
+
+  external-secrets:
+    dir: platform/external-secrets
+    namespace: external-secrets
+    repo: https://charts.external-secrets.io
+    chart: external-secrets
+    version: 2.15.0
+    wave: 0
+
+  gateway:
+    dir: platform/gateway
+    namespace: gateway
+    wave: 1
+
+  monitoring:
+    dir: platform/monitoring
+    namespace: monitoring
+    repo: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    version: 93.3.0
+    manifests: true
+    wave: 1
+
+  demo:
+    dir: apps/demo
+    namespace: demo
+    repo: ghcr.io/stefanprodan/charts
+    chart: podinfo
+    version: 6.17.0
+    manifests: true
+    wave: 2
+
+  # Last, so its routes find the Gateway API CRDs. It is already running:
+  # `make argocd` installs it with platform/argocd/values.yaml only.
+  argocd:
+    dir: platform/argocd
+    namespace: argocd
+    repo: https://argoproj.github.io/argo-helm
+    chart: argo-cd
+    version: 10.18.0  # keep in step with the bootstrap install in the Makefile
+    wave: 3

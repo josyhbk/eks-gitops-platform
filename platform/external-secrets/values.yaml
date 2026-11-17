@@ -1,0 +1,16 @@
+# External Secrets Operator: turns ExternalSecret objects into Kubernetes
+# Secrets, from a generator or from a store such as AWS Secrets Manager.
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+webhook:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+certController:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi

@@ -1,0 +1,65 @@
+{{- range $name, $c := .Values.components }}
+{{- if ne $c.enabled false }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $name }}
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $c.wave | default 0 | quote }}
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ $c.namespace }}
+  {{- if $c.chart }}
+  sources:
+    # The upstream chart, with values from <dir>/values.yaml and <dir>/values-<cluster>.yaml
+    - repoURL: {{ $c.repo }}
+      chart: {{ $c.chart }}
+      targetRevision: {{ $c.version | quote }}
+      helm:
+        releaseName: {{ $name }}
+        ignoreMissingValueFiles: true
+        valueFiles:
+          - $values/{{ $c.dir }}/values.yaml
+          - $values/{{ $c.dir }}/values-{{ $.Values.cluster }}.yaml
+    - repoURL: {{ $.Values.repoURL }}
+      targetRevision: {{ $.Values.revision }}
+      ref: values
+    {{- if $c.manifests }}
+    # Plain manifests that go with the chart: dashboards, alert rules
+    - repoURL: {{ $.Values.repoURL }}
+      targetRevision: {{ $.Values.revision }}
+      path: {{ $c.dir }}/manifests
+    {{- end }}
+  {{- else }}
+  # A chart that lives in this repo
+  source:
+    repoURL: {{ $.Values.repoURL }}
+    targetRevision: {{ $.Values.revision }}
+    path: {{ $c.dir }}
+    helm:
+      releaseName: {{ $name }}
+      ignoreMissingValueFiles: true
+      valueFiles:
+        - values.yaml
+        - values-{{ $.Values.cluster }}.yaml
+  {{- end }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    # A first sync can race a CRD that another component is still installing
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+{{- end }}
+{{- end }}

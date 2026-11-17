@@ -1,0 +1,10 @@
+grafana:
+  route:
+    main:
+      enabled: true
+      hostnames:
+        - grafana.localhost
+      parentRefs:
+        - name: web
+          namespace: gateway
+          sectionName: http

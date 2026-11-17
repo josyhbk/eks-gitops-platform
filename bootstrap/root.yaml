@@ -1,0 +1,29 @@
+# The one Application applied by hand. It renders clusters/, which holds an
+# Application per component; from then on Argo CD manages everything,
+# itself included. `make root` fills in REPO_URL, REVISION and CLUSTER.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: REPO_URL
+    targetRevision: REVISION
+    path: clusters
+    helm:
+      valueFiles:
+        - values-CLUSTER.yaml
+      parameters:
+        - name: repoURL
+          value: REPO_URL
+        - name: revision
+          value: REVISION
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
